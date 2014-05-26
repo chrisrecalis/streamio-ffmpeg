@@ -13,10 +13,10 @@ module FFMPEG
       @@timeout
     end
 
-    def initialize(movie, output_file, options = EncodingOptions.new, transcoder_options = {})
+    def initialize(movie, output_file, options = EncodingOptions.new, transcoder_options = {}, input_options = "")
       @movie = movie
       @output_file = output_file
-
+      @input_options = input_options
       if options.is_a?(String) || options.is_a?(EncodingOptions)
         @raw_options = options
       elsif options.is_a?(Hash)
@@ -54,11 +54,7 @@ module FFMPEG
     private
     # frame= 4855 fps= 46 q=31.0 size=   45306kB time=00:02:42.28 bitrate=2287.0kbits/
     def transcode_movie
-      if @movie.custom_command
-        @command = "#{FFMPEG.ffmpeg_binary} #{Shellwords.escape(@movie.custom_command)}"
-      else 
-        @command = "#{FFMPEG.ffmpeg_binary} -y -i #{Shellwords.escape(@movie.path)} #{@raw_options} #{Shellwords.escape(@output_file)}"
-      end
+      @command = "#{FFMPEG.ffmpeg_binary} #{@input_options} -y -i #{Shellwords.escape(@movie.path)} #{@raw_options} #{Shellwords.escape(@output_file)}"
       FFMPEG.logger.info("Running transcoding...\n#{@command}\n")
       @output = ""
 
